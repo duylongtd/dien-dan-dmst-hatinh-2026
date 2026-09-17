@@ -2,10 +2,10 @@
 
 import { EVENT } from '@/lib/data';
 import Countdown from '../ui/Countdown';
+import { scrollToId } from '@/lib/store';
 
 export default function Hero() {
-  const go = (id) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const go = scrollToId;
 
   return (
     <section

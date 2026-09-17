@@ -1,12 +1,18 @@
 // Custom GLSL for the signature particle field.
 // Morphs between 3 position targets (text "HÀ TĨNH" -> sphere -> data-field),
-// applies pointer repulsion and gentle idle drift. Colour varies per particle
-// with rare gold sparkles as the single accent.
+// applies pointer repulsion and a smooth idle drift. Colour varies per
+// particle with rare gold sparkles as the single accent.
+//
+// Point size is expressed in CSS pixels and attenuated by distance; it is
+// clamped so no particle can ever balloon into a screen-filling quad (which
+// is what makes additive particle fields grind a GPU to a halt).
 
 export const particleVertex = /* glsl */ `
   uniform float uTime;
   uniform float uMorph;       // 0..3 (three morph segments, wraps around)
-  uniform float uSize;
+  uniform float uSize;        // base size in CSS px (before distance attenuation)
+  uniform float uScale;       // viewport height / 2, in CSS px
+  uniform float uPixelRatio;  // renderer pixel ratio
   uniform vec2  uMouse;       // pointer in world XY on the z=0 plane
   uniform float uMouseForce;
   uniform float uScatter;     // 0 idle .. 1 fully scattered (used on load)
@@ -20,14 +26,6 @@ export const particleVertex = /* glsl */ `
   varying vec3 vColor;
   varying float vGlow;
 
-  // cheap 3d noise
-  vec3 hash3(vec3 p){
-    p = vec3(dot(p,vec3(127.1,311.7,74.7)),
-             dot(p,vec3(269.5,183.3,246.1)),
-             dot(p,vec3(113.5,271.9,124.6)));
-    return -1.0 + 2.0*fract(sin(p)*43758.5453123);
-  }
-
   void main(){
     // pick the two targets for the current segment
     float m = mod(uMorph, 3.0);
@@ -38,9 +36,13 @@ export const particleVertex = /* glsl */ `
     float t = smoothstep(0.0, 1.0, seg);
     vec3 pos = mix(a, b, t);
 
-    // idle drift so the cloud always feels alive
-    vec3 n = hash3(pos * 0.35 + uTime * 0.06);
-    pos += n * (0.05 + 0.10 * aRand);
+    // smooth idle drift — continuous in time, unique phase per particle
+    float ph = aRand * 6.2831;
+    pos += vec3(
+      sin(uTime * 0.45 + ph),
+      cos(uTime * 0.38 + ph * 2.0),
+      sin(uTime * 0.30 + ph * 3.0)
+    ) * (0.025 + 0.05 * aRand);
 
     // load scatter (particles fly in from a shell)
     vec3 shell = normalize(pos + 0.001) * (6.0 + aRand * 4.0);
@@ -48,16 +50,17 @@ export const particleVertex = /* glsl */ `
 
     // pointer repulsion on the XY plane
     vec2 d = pos.xy - uMouse;
-    float dist = length(d);
-    float force = uMouseForce * exp(-dist * dist * 0.5);
+    float dist2 = dot(d, d);
+    float force = uMouseForce * exp(-dist2 * 0.5);
     pos.xy += normalize(d + 0.0001) * force;
     pos.z += force * 0.4;
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
 
-    float twinkle = 0.6 + 0.4 * sin(uTime * 2.0 + aRand * 30.0);
-    gl_PointSize = uSize * twinkle * (1.0 + aRand) * (300.0 / -mv.z);
+    float twinkle = 0.7 + 0.3 * sin(uTime * 2.0 + aRand * 30.0);
+    float size = uSize * (0.6 + 0.8 * aRand) * twinkle * (uScale / max(0.5, -mv.z));
+    gl_PointSize = clamp(size * uPixelRatio, 1.0, 22.0 * uPixelRatio);
 
     vColor = aColor;
     vGlow = twinkle;
@@ -66,16 +69,16 @@ export const particleVertex = /* glsl */ `
 
 export const particleFragment = /* glsl */ `
   precision mediump float;
+  uniform float uFade;              // 1 in the hero, dims once content scrolls over the field
   varying vec3 vColor;
   varying float vGlow;
 
   void main(){
     vec2 uv = gl_PointCoord - 0.5;
-    float r = length(uv);
-    if (r > 0.5) discard;
-    float alpha = smoothstep(0.5, 0.0, r);
-    alpha = pow(alpha, 1.6);
-    vec3 col = vColor * (0.75 + 0.6 * vGlow);
-    gl_FragColor = vec4(col, alpha);
+    float r2 = dot(uv, uv);            // 0.25 at the circle edge
+    float alpha = smoothstep(0.25, 0.0, r2);
+    alpha *= alpha;                    // soft core, no pow()
+    vec3 col = vColor * (0.7 + 0.6 * vGlow) * uFade;
+    gl_FragColor = vec4(col, alpha);   // additive: alpha 0 adds nothing, no discard needed
   }
 `;

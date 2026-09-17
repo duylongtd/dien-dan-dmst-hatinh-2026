@@ -44,7 +44,6 @@ export default function Speakers() {
         <p
           style={{
             color: 'var(--muted)',
-            marginTop: '0.8rem',
             maxWidth: 640,
             margin: '0.8rem auto 0',
             lineHeight: 1.6,
@@ -80,11 +79,8 @@ export default function Speakers() {
                 minHeight: 620,
                 background:
                   side === 'left'
-                    ? 'radial-gradient(120% 100% at 0% 50%, rgba(26,79,216,0.28), rgba(3,7,32,0.2))'
-                    : 'radial-gradient(120% 100% at 100% 50%, rgba(245,197,66,0.14), rgba(3,7,32,0.2))',
-                transition: 'filter 0.5s, opacity 0.5s',
-                filter: dimmed ? 'grayscale(0.6) brightness(0.6)' : 'none',
-                opacity: dimmed ? 0.55 : 1,
+                    ? 'radial-gradient(120% 100% at 0% 50%, rgba(26,79,216,0.32), rgba(3,7,32,0.62))'
+                    : 'radial-gradient(120% 100% at 100% 50%, rgba(245,197,66,0.16), rgba(3,7,32,0.62))',
                 display: 'flex',
                 alignItems: 'flex-end',
                 justifyContent: side === 'left' ? 'flex-start' : 'flex-end',
@@ -106,7 +102,7 @@ export default function Speakers() {
                     isActive ? sp.accent : 'rgba(143,166,216,0.25)'
                   }`,
                   letterSpacing: '-0.03em',
-                  transition: 'all 0.5s',
+                  transition: 'opacity 0.5s, -webkit-text-stroke-color 0.5s',
                   textAlign: side === 'left' ? 'left' : 'right',
                   opacity: isActive ? 0.9 : 0.35,
                   pointerEvents: 'none',
@@ -131,7 +127,8 @@ export default function Speakers() {
                 }}
               />
 
-              {/* cutout */}
+              {/* cutout — glow is a cheap gradient behind the figure instead of
+                  a drop-shadow filter re-rasterised on every hover frame */}
               <div
                 style={{
                   position: 'relative',
@@ -141,21 +138,35 @@ export default function Speakers() {
                   alignSelf: 'flex-end',
                   transform: isActive ? 'translateY(0)' : 'translateY(12px)',
                   transition: 'transform 0.6s cubic-bezier(.2,.8,.2,1)',
-                  filter: `drop-shadow(0 20px 60px ${sp.accent}55)`,
                   zIndex: 2,
                   margin: side === 'left' ? '0 0 0 2%' : '0 2% 0 0',
                 }}
               >
+                <div
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    left: '-20%',
+                    right: '-20%',
+                    bottom: '-10%',
+                    height: '70%',
+                    background: `radial-gradient(50% 50% at 50% 60%, ${sp.accent}40, transparent 70%)`,
+                    opacity: isActive ? 1 : 0.55,
+                    transition: 'opacity 0.5s',
+                    pointerEvents: 'none',
+                  }}
+                />
                 <Image
                   src={sp.photo}
                   alt={sp.name}
                   fill
-                  sizes="(max-width: 768px) 90vw, 40vw"
+                  sizes="(max-width: 768px) 70vw, 400px"
+                  quality={95}
+                  draggable={false}
                   style={{
                     objectFit: 'contain',
                     objectPosition: 'bottom',
                   }}
-                  priority
                 />
               </div>
 
@@ -170,11 +181,9 @@ export default function Speakers() {
                   padding: '1.4rem',
                   borderRadius: 6,
                   zIndex: 3,
-                  transform: isActive
-                    ? 'translateY(0)'
-                    : 'translateY(10px)',
+                  transform: isActive ? 'translateY(0)' : 'translateY(10px)',
                   opacity: isActive ? 1 : 0.82,
-                  transition: 'all 0.5s',
+                  transition: 'transform 0.5s, opacity 0.5s',
                 }}
               >
                 <div
@@ -254,6 +263,21 @@ export default function Speakers() {
                   </p>
                 </div>
               </div>
+
+              {/* dim veil for the non-active side: an opacity fade on the
+                  compositor instead of grayscale/brightness filters */}
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(3,7,32,0.6)',
+                  opacity: dimmed ? 1 : 0,
+                  transition: 'opacity 0.5s',
+                  pointerEvents: 'none',
+                  zIndex: 4,
+                }}
+              />
             </article>
           );
         })}

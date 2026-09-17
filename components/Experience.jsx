@@ -33,53 +33,77 @@ function Bridge({ morphRef, scatterRef }) {
   return null;
 }
 
-export default function Experience() {
+/**
+ * Persistent full-screen WebGL backdrop.
+ *
+ * `lite` = phones / low-end devices: pixel ratio 1, fewer particles, no
+ * post-processing. The DOM sits above the canvas, so pointer events are read
+ * from the document root (R3F `eventSource`) instead of the canvas itself.
+ */
+export default function Experience({ lite = false }) {
   const morphRef = useRef(0);
   const scatterRef = useRef(1);
+  // This component is loaded with ssr:false, so document is always present.
+  const eventSource =
+    typeof document !== 'undefined' ? document.documentElement : undefined;
 
   return (
-    <Canvas
-      className="webgl-canvas"
-      dpr={[1, 1.8]}
-      camera={{ position: [0, 0, 9], fov: 55, near: 0.1, far: 100 }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-    >
-      <color attach="background" args={['#030720']} />
-      <fog attach="fog" args={['#030720', 12, 26]} />
+    <div className="webgl-layer" data-mode={lite ? 'lite' : 'full'} aria-hidden>
+      <Canvas
+        dpr={lite ? 1 : [1, 1.5]}
+        camera={{ position: [0, 0, 9], fov: 55, near: 0.1, far: 100 }}
+        gl={{
+          antialias: false, // post-processing makes MSAA on the backbuffer pointless
+          alpha: false,
+          stencil: false,
+          powerPreference: 'high-performance',
+        }}
+        eventSource={eventSource}
+        eventPrefix="client"
+      >
+        <color attach="background" args={['#030720']} />
+        <fog attach="fog" args={['#030720', 12, 26]} />
 
-      <CameraRig />
-      <Bridge morphRef={morphRef} scatterRef={scatterRef} />
+        <CameraRig />
+        <Bridge morphRef={morphRef} scatterRef={scatterRef} />
 
-      <Suspense fallback={null}>
-        <ParticleField morphRef={morphRef} scatterRef={scatterRef} />
-        <HoloGrid />
-        <group position={[0, 0, 1]}>
-          <Drone
-            src="/drone-multirotor.png"
-            position={[-5.2, 2.2, 0]}
-            scale={2.2}
-            speed={0.8}
-            phase={0}
+        <Suspense fallback={null}>
+          <ParticleField
+            morphRef={morphRef}
+            scatterRef={scatterRef}
+            count={lite ? 5000 : 14000}
           />
-          <Drone
-            src="/drone-fixedwing.png"
-            position={[5.4, -1.6, -1]}
-            scale={2.0}
-            speed={1.1}
-            phase={2}
-          />
-        </group>
-      </Suspense>
+          <HoloGrid />
+          <group position={[0, 0, 1]}>
+            <Drone
+              src="/drone-multirotor.webp"
+              position={[-5.2, 2.2, 0]}
+              scale={2.2}
+              speed={0.8}
+              phase={0}
+            />
+            <Drone
+              src="/drone-fixedwing.webp"
+              position={[5.4, -1.6, -1]}
+              scale={2.0}
+              speed={1.1}
+              phase={2}
+            />
+          </group>
+        </Suspense>
 
-      <EffectComposer>
-        <Bloom
-          intensity={0.9}
-          luminanceThreshold={0.15}
-          luminanceSmoothing={0.9}
-          mipmapBlur
-        />
-        <Vignette eskil={false} offset={0.25} darkness={0.85} />
-      </EffectComposer>
-    </Canvas>
+        {!lite && (
+          <EffectComposer multisampling={0}>
+            <Bloom
+              intensity={0.8}
+              luminanceThreshold={0.18}
+              luminanceSmoothing={0.9}
+              mipmapBlur
+            />
+            <Vignette eskil={false} offset={0.25} darkness={0.85} />
+          </EffectComposer>
+        )}
+      </Canvas>
+    </div>
   );
 }

@@ -48,14 +48,23 @@ lib/
   store.js          # singleton nối scroll DOM với vòng lặp WebGL
 public/
   speaker-ducanh.png / speaker-thuan.png   # 2 diễn giả đã tách nền
-  drone-fixedwing.png / drone-multirotor.png
+  drone-fixedwing.webp / drone-multirotor.webp
 ```
 
 ## Điểm nhấn kỹ thuật
 
 - **Particle field morph** (`ParticleField.jsx`): 3 mục tiêu vị trí (aPos0/1/2) trộn trong vertex shader theo uniform `uMorph`, cuộn trang điều khiển morph. Chữ "HÀ TĨNH" được lấy mẫu điểm từ canvas 2D lúc chạy — đổi chữ ở dòng `textTarget('HÀ TĨNH', COUNT)`.
 - **Split-light diễn giả** (`Speakers.jsx`): rê chuột/chạm để rọi sáng từng người; chữ khổng lồ "NHÀ ĐẦU TƯ" / "CHUYÊN GIA" nằm sau cutout đúng phong cách One Mount.
-- **Hiệu suất**: `dpr={[1, 1.8]}`, additive blending, `depthWrite:false`, tôn trọng `prefers-reduced-motion`.
+- **Hiệu suất** (`Experience.jsx`, `page.jsx`):
+  - Canvas nằm trong `.webgl-layer` (`position: fixed`) — không đặt `position` lên chính `<Canvas>` vì R3F ghi inline style `position: relative` đè lên class.
+  - Kích thước hạt tính theo px CSS và **clamp** (`gl_PointSize ≤ 22px × dpr`); trước đây mỗi hạt phình tới hàng trăm px, 14.000 hạt phủ chồng lên nhau khiến GPU nghẽn (~16 fps ngay cả khi canvas chỉ cao 150px).
+  - `dpr` tối đa 1.5, `antialias: false`, `EffectComposer multisampling={0}` (MSAA 8× vô nghĩa với hạt additive nhưng tốn bộ đệm rất lớn).
+  - Panel `.glass` không dùng `backdrop-filter` (16 panel blur trên canvas vẽ lại mỗi frame là gánh nặng compositor lớn nhất); nav vẫn giữ blur vì chỉ có một.
+  - Ba chế độ tự chọn khi tải: `full` (desktop), `lite` (điện thoại / màn nhỏ / CPU yếu: dpr 1, 5.000 hạt, không bloom), `off` (`prefers-reduced-motion`: không tạo canvas).
+  - Canvas chỉ mount sau khi font hiển thị sẵn sàng (chữ hạt "HÀ TĨNH" được lấy mẫu bằng đúng font Be Vietnam Pro qua biến `--font-display`).
+  - Khi cuộn qua hero, hạt và drone tự mờ còn ~45% (`uFade`), các section nội dung có lớp `.scrim` tối và chữ có viền tối để đọc được trên nền chuyển động.
+  - Countdown render rỗng ở SSR rồi mới điền số ở client — tránh lỗi hydration khiến React vứt toàn bộ HTML server.
+  - Cuộn chương trình dùng `lenis.scrollTo` (`lib/store.js`) thay vì `scrollIntoView` để không giằng co với Lenis.
 
 ## Tuỳ biến nhanh
 
@@ -69,4 +78,19 @@ public/
 
 ## Ảnh đã xử lý
 
-4 ảnh trong `public/` đã được tách nền (rembg + u2net human-seg, alpha matting, lọc vùng liên thông). Thay ảnh gốc chất lượng cao hơn nếu có.
+Ảnh gốc rất nhỏ (drone 355×135, chân dung ~750 px, mềm) và mask tách nền cũ quá rộng. Quy trình xử lý lại, chạy hoàn toàn offline:
+
+1. Inpaint vùng trong suốt rồi **siêu phân giải 4×** bằng Real-ESRGAN (`pip install realesrgan-ncnn-py`, model `realesrgan-x4plus`, chạy qua Vulkan trên Apple Silicon). Chân dung giữ ở 2×, drone giữ 4×.
+2. Cắt lại ở độ phân giải cao bằng Vision của macOS: `tools/segment-person.swift` (person segmentation, có tham số bào mòn mask) cho diễn giả; `tools/lift-subject.swift` (lift subject, macOS 14+) cho drone đa rotor. Drone cánh cố định giữ alpha gốc phóng lên vì cánh quá mỏng, mask Vision cắt mất.
+3. Làm mềm alpha ~1 px để hết răng cưa. Drone lưu WebP q92 (texture Three.js tải trực tiếp), diễn giả lưu PNG để `next/image` tự tối ưu.
+- `next/image` cho ảnh diễn giả dùng `sizes="320px"` + `quality={92}` để khớp kích thước hiển thị thực và không bị nén mềm viền alpha. Thay ảnh gốc độ phân giải cao hơn nếu có.
+
+## Kiểm tra hiệu năng
+
+Đo bằng Edge headless (GPU thật, ANGLE Metal, 1440×900 @2x) trên Apple M1:
+
+| | Trước | Sau |
+|---|---|---|
+| Canvas thực tế | 1440×150 (dải mỏng đầu trang) | 1440×900 toàn màn hình |
+| Hero | 16 fps | 60 fps |
+| Cuộn toàn trang | rAF chết (0 frame / 6 s) | 60 fps, không spike |

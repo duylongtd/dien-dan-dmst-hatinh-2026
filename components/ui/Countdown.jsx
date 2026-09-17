@@ -15,18 +15,22 @@ function diff(target) {
 }
 
 export default function Countdown() {
-  const [t, setT] = useState(() => diff(EVENT.datetimeISO));
+  // Start empty: computing the time on the server and again on the client
+  // produced different seconds and a full hydration mismatch (React threw the
+  // whole server HTML away and re-rendered the page from scratch).
+  const [t, setT] = useState(null);
 
   useEffect(() => {
+    setT(diff(EVENT.datetimeISO));
     const id = setInterval(() => setT(diff(EVENT.datetimeISO)), 1000);
     return () => clearInterval(id);
   }, []);
 
   const units = [
-    { v: t.d, l: 'ngày' },
-    { v: t.h, l: 'giờ' },
-    { v: t.m, l: 'phút' },
-    { v: t.s, l: 'giây' },
+    { v: t?.d, l: 'ngày' },
+    { v: t?.h, l: 'giờ' },
+    { v: t?.m, l: 'phút' },
+    { v: t?.s, l: 'giây' },
   ];
 
   return (
@@ -51,7 +55,7 @@ export default function Countdown() {
               color: 'var(--paper)',
             }}
           >
-            {String(u.v).padStart(2, '0')}
+            {u.v == null ? '--' : String(u.v).padStart(2, '0')}
           </div>
           <div
             className="telemetry"

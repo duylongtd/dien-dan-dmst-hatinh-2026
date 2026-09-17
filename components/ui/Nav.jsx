@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { NAV } from '@/lib/data';
+import { scrollToId } from '@/lib/store';
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -12,10 +13,7 @@ export default function Nav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const go = (id) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  const go = scrollToId;
 
   return (
     <nav
@@ -58,7 +56,7 @@ export default function Nav() {
 
       <div
         className="hidden md:flex"
-        style={{ display: 'flex', gap: '1.6rem', alignItems: 'center' }}
+        style={{ gap: '1.6rem', alignItems: 'center' }}
       >
         {NAV.map((n) => (
           <button

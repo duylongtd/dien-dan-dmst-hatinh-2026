@@ -57,8 +57,8 @@ export default function Journey() {
                   cursor: 'pointer',
                   color: 'var(--paper)',
                   background: on
-                    ? 'linear-gradient(160deg, rgba(26,79,216,0.35), rgba(5,11,46,0.4))'
-                    : 'rgba(5,11,46,0.55)',
+                    ? 'linear-gradient(160deg, rgba(26,79,216,0.5), rgba(5,11,46,0.88))'
+                    : 'rgba(5,11,46,0.86)',
                   transition: 'background 0.35s',
                   minHeight: 220,
                   display: 'flex',

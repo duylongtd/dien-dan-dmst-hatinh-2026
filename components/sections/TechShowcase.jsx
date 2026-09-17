@@ -46,7 +46,7 @@ export default function TechShowcase() {
   const [hover, setHover] = useState(null);
 
   return (
-    <section id="tech" className="section content-layer">
+    <section id="tech" className="section content-layer scrim">
       <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
         <header style={{ marginBottom: '2.5rem', maxWidth: 760 }}>
           <div className="telemetry" style={{ marginBottom: '0.8rem' }}>

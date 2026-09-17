@@ -9,13 +9,13 @@ export default function Loader() {
   useEffect(() => {
     let p = 0;
     const id = setInterval(() => {
-      p = Math.min(100, p + Math.random() * 18);
+      p = Math.min(100, p + 8 + Math.random() * 14);
       setProgress(Math.floor(p));
       if (p >= 100) {
         clearInterval(id);
         setTimeout(() => setGone(true), 600);
       }
-    }, 180);
+    }, 110);
     return () => clearInterval(id);
   }, []);
 

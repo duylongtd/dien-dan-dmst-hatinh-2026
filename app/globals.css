@@ -46,14 +46,15 @@ body {
   border-radius: 9px;
 }
 
-/* The persistent WebGL canvas sits behind all content */
-.webgl-canvas {
+/* The persistent WebGL canvas sits behind all content.
+   R3F's <Canvas> wrapper carries inline position/width/height, so the fixed
+   full-screen box has to be a parent element, not the canvas wrapper itself. */
+.webgl-layer {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   z-index: 0;
   pointer-events: none;
+  contain: strict;
 }
 
 .content-layer {
@@ -61,15 +62,16 @@ body {
   z-index: 2;
 }
 
-/* Frosted glass HUD panel */
+/* Frosted glass HUD panel.
+   No backdrop-filter: sixteen blurred panels sitting on a canvas that repaints
+   every frame forced the compositor to re-blur all of them 60x a second. A
+   slightly more opaque gradient over the dark scene reads the same. */
 .glass {
   background: linear-gradient(
     135deg,
-    rgba(26, 79, 216, 0.14),
-    rgba(5, 11, 46, 0.55)
+    rgba(26, 79, 216, 0.28),
+    rgba(5, 11, 46, 0.92)
   );
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid rgba(56, 208, 255, 0.22);
   box-shadow: 0 8px 40px rgba(3, 7, 32, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -115,6 +117,7 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  text-shadow: 0 0 24px rgba(56, 208, 255, 0.2);
 }
 
 /* Telemetry mono readouts */
@@ -136,8 +139,24 @@ body {
   padding: 6rem clamp(1.25rem, 5vw, 6rem);
 }
 
+/* Dark scrim for content sections so copy stays readable over the particle
+   field; the hero and the speaker split stay transparent on purpose. */
+.scrim {
+  background-color: rgba(3, 7, 32, 0.62);
+}
+
+/* Legibility: a tight dark halo behind running text over the canvas */
+.content-layer h1,
+.content-layer h2,
+.content-layer h3,
+.content-layer p,
+.content-layer li {
+  text-shadow: 0 1px 2px rgba(3, 7, 32, 0.9), 0 0 18px rgba(3, 7, 32, 0.75);
+}
+
 /* Grid backdrop line pattern (subtle blueprint feel) */
 .blueprint {
+  background-color: rgba(3, 7, 32, 0.62);
   background-image: linear-gradient(
       rgba(56, 208, 255, 0.05) 1px,
       transparent 1px

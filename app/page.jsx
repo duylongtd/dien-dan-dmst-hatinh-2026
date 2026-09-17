@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -19,7 +19,38 @@ const Experience = dynamic(() => import('@/components/Experience'), {
   ssr: false,
 });
 
+// 'off'  -> user asked for reduced motion: static background only
+// 'lite' -> phone / small screen / weak CPU: no bloom, fewer particles, dpr 1
+// 'full' -> desktop
+function detectGlMode() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'off';
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const small = window.innerWidth < 820;
+  const weak =
+    (navigator.hardwareConcurrency || 8) <= 4 ||
+    (navigator.deviceMemory || 8) <= 4;
+  return coarse || small || weak ? 'lite' : 'full';
+}
+
 export default function Page() {
+  const [glMode, setGlMode] = useState(null);
+
+  // Mount the WebGL layer only after the display font is available so the
+  // particle text is sampled with the real typeface, and after first paint so
+  // the hero HTML never waits on shader compilation.
+  useEffect(() => {
+    let alive = true;
+    const mode = detectGlMode();
+    const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
+    const timeout = new Promise((r) => setTimeout(r, 1500));
+    Promise.race([fonts, timeout]).then(() => {
+      if (alive) setGlMode(mode);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   useEffect(() => {
     // --- smooth scroll ---
     const lenis = new Lenis({
@@ -27,6 +58,7 @@ export default function Page() {
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
+    store.lenis = lenis;
     let raf;
     const loop = (time) => {
       lenis.raf(time);
@@ -76,6 +108,7 @@ export default function Page() {
       cancelAnimationFrame(raf);
       clearTimeout(assemble);
       lenis.destroy();
+      store.lenis = null;
       io.disconnect();
     };
   }, []);
@@ -83,7 +116,7 @@ export default function Page() {
   return (
     <>
       <Loader />
-      <Experience />
+      {glMode && glMode !== 'off' && <Experience lite={glMode === 'lite'} />}
       <Nav />
       <main className="content-layer">
         <Hero />
