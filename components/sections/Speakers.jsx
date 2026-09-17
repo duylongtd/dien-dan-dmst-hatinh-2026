@@ -28,8 +28,8 @@ export default function Speakers() {
           padding: '0 1.5rem',
         }}
       >
-        <div className="telemetry" style={{ marginBottom: '0.6rem' }}>
-          HAI GÓC NHÌN — MỘT CUỘC ĐỐI THOẠI
+        <div className="kicker kicker--center" style={{ marginBottom: '0.8rem' }}>
+          Hai góc nhìn — một cuộc đối thoại
         </div>
         <h2
           style={{
@@ -187,13 +187,19 @@ export default function Speakers() {
                 }}
               >
                 <div
-                  className="telemetry"
-                  style={{ color: sp.accent, marginBottom: '0.4rem' }}
+                  className="label"
+                  style={{ color: sp.accent, marginBottom: '0.45rem' }}
                 >
                   {sp.role}
                 </div>
-                <div style={{ fontWeight: 900, fontSize: '1.5rem' }}>
+                <div style={{ fontWeight: 900, fontSize: '1.6rem', lineHeight: 1.1 }}>
                   {sp.name}
+                </div>
+                <div
+                  className="org-badge"
+                  style={{ color: sp.accent, marginTop: '0.7rem' }}
+                >
+                  {sp.org}
                 </div>
                 <p
                   style={{

@@ -57,10 +57,7 @@ export default function Countdown() {
           >
             {u.v == null ? '--' : String(u.v).padStart(2, '0')}
           </div>
-          <div
-            className="telemetry"
-            style={{ marginTop: 6, textTransform: 'uppercase' }}
-          >
+          <div className="label" style={{ marginTop: 8, fontSize: '0.72rem' }}>
             {u.l}
           </div>
         </div>

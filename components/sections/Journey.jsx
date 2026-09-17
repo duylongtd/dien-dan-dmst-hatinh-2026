@@ -10,8 +10,8 @@ export default function Journey() {
     <section id="journey" className="section content-layer blueprint">
       <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
         <header style={{ marginBottom: '2.5rem', maxWidth: 720 }}>
-          <div className="telemetry" style={{ marginBottom: '0.8rem' }}>
-            HÀNH TRÌNH THƯƠNG MẠI HOÁ
+          <div className="kicker" style={{ marginBottom: '1rem' }}>
+            Hành trình thương mại hoá
           </div>
           <h2
             style={{
@@ -68,7 +68,9 @@ export default function Journey() {
                 <div
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize: '0.9rem',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
                     color: on ? 'var(--gold)' : 'var(--muted)',
                     transition: 'color 0.35s',
                   }}

@@ -49,8 +49,8 @@ export default function TechShowcase() {
     <section id="tech" className="section content-layer scrim">
       <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
         <header style={{ marginBottom: '2.5rem', maxWidth: 760 }}>
-          <div className="telemetry" style={{ marginBottom: '0.8rem' }}>
-            KHÔNG GIAN GIỚI THIỆU & TRẢI NGHIỆM
+          <div className="kicker" style={{ marginBottom: '1rem' }}>
+            Không gian giới thiệu & trải nghiệm
           </div>
           <h2
             style={{
@@ -159,7 +159,7 @@ export default function TechShowcase() {
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div
                     className="telemetry"
-                    style={{ color: accent, marginBottom: '0.5rem' }}
+                    style={{ color: accent, marginBottom: '0.5rem', fontWeight: 700 }}
                   >
                     {String(i + 1).padStart(2, '0')} / 06
                   </div>

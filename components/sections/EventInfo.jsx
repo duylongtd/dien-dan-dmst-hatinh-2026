@@ -43,6 +43,7 @@ export default function EventInfo() {
               <span
                 style={{
                   fontWeight: 900,
+                  fontSize: '1.05rem',
                   color: 'var(--gold)',
                   fontFamily: 'var(--font-mono)',
                 }}
@@ -111,8 +112,8 @@ export default function EventInfo() {
             className="glass"
             style={{ borderRadius: 10, padding: 'clamp(1.5rem, 3vw, 2.5rem)' }}
           >
-            <div className="telemetry" style={{ marginBottom: '0.6rem' }}>
-              ĐĂNG KÝ THAM DỰ
+            <div className="kicker" style={{ marginBottom: '0.8rem' }}>
+              Đăng ký tham dự
             </div>
             <h3 style={{ fontWeight: 800, fontSize: '1.4rem', margin: 0 }}>
               Giữ chỗ tại diễn đàn
@@ -192,10 +193,19 @@ export default function EventInfo() {
             borderTop: '1px solid rgba(56,208,255,0.15)',
             textAlign: 'center',
             color: 'var(--muted)',
-            fontSize: '0.82rem',
+            fontSize: '0.92rem',
+            lineHeight: 1.8,
           }}
         >
-          {EVENT.host} · Sở Khoa học và Công nghệ Hà Tĩnh · {EVENT.tagline}
+          <span style={{ fontWeight: 800, color: 'var(--paper)', letterSpacing: '0.08em' }}>
+            {EVENT.host}
+          </span>
+          <span style={{ margin: '0 0.7rem', color: 'var(--cyan)' }}>·</span>
+          <span style={{ fontWeight: 700, color: 'var(--paper)' }}>
+            Sở Khoa học và Công nghệ Hà Tĩnh
+          </span>
+          <span style={{ margin: '0 0.7rem', color: 'var(--cyan)' }}>·</span>
+          <span style={{ fontStyle: 'italic' }}>{EVENT.tagline}</span>
         </footer>
       </div>
     </section>
@@ -213,10 +223,10 @@ function Row({ label, value }) {
         paddingLeft: '1rem',
       }}
     >
-      <span className="telemetry" style={{ minWidth: 78 }}>
+      <span className="label" style={{ minWidth: 96 }}>
         {label}
       </span>
-      <span style={{ fontWeight: 600, fontSize: '1rem' }}>{value}</span>
+      <span style={{ fontWeight: 700, fontSize: '1.05rem' }}>{value}</span>
     </div>
   );
 }
@@ -225,8 +235,8 @@ function Field({ label, value, onChange, type = 'text' }) {
   return (
     <label style={{ display: 'block' }}>
       <span
-        className="telemetry"
-        style={{ display: 'block', marginBottom: '0.4rem' }}
+        className="label"
+        style={{ display: 'block', marginBottom: '0.45rem', fontSize: '0.74rem' }}
       >
         {label}
       </span>

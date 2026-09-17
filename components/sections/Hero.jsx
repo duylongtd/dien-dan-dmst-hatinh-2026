@@ -16,8 +16,8 @@ export default function Hero() {
       {/* host + celebrate strip */}
       <div className="reveal" data-reveal style={{ marginBottom: '1.4rem' }}>
         <div
-          className="telemetry"
-          style={{ letterSpacing: '0.35em', marginBottom: '0.6rem' }}
+          className="kicker kicker--center kicker--lg"
+          style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}
         >
           {EVENT.host}
         </div>
@@ -26,13 +26,14 @@ export default function Hero() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.6rem',
-            padding: '0.4rem 1.1rem',
+            padding: '0.45rem 1.2rem',
             borderRadius: 999,
-            border: '1px solid rgba(56,208,255,0.3)',
-            background: 'rgba(56,208,255,0.06)',
-            fontSize: '0.82rem',
+            border: '1px solid rgba(56,208,255,0.4)',
+            background: 'rgba(56,208,255,0.08)',
+            fontSize: '0.92rem',
+            letterSpacing: '0.08em',
             color: 'var(--cyan)',
-            fontWeight: 600,
+            fontWeight: 700,
           }}
         >
           <span style={{ width: 7, height: 7, borderRadius: 99, background: 'var(--gold)' }} />
@@ -111,7 +112,7 @@ export default function Hero() {
       >
         <div className="telemetry">◦ LAT {EVENT.geo.lat.toFixed(4)}</div>
         <div className="telemetry">◦ LNG {EVENT.geo.lng.toFixed(4)}</div>
-        <div className="telemetry" style={{ color: 'var(--muted)' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.95rem', marginTop: 4 }}>
           {EVENT.venue}
         </div>
       </div>
@@ -126,8 +127,8 @@ export default function Hero() {
           textAlign: 'right',
         }}
       >
-        <div className="telemetry">SỰ KIỆN</div>
-        <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>
+        <div className="label">Sự kiện</div>
+        <div style={{ fontWeight: 800, fontSize: '1.05rem', marginTop: 4 }}>
           {EVENT.dateLabel}
         </div>
       </div>
